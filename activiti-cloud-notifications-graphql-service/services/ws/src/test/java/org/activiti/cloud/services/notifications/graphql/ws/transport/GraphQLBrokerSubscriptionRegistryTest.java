@@ -15,24 +15,24 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry.SessionSubscriptionInfo;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 
 public class GraphQLBrokerSubscriptionRegistryTest {
 
     private GraphQLBrokerSubscriptionRegistry testSubject;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() {
         this.testSubject = new GraphQLBrokerSubscriptionRegistry();
     }
 

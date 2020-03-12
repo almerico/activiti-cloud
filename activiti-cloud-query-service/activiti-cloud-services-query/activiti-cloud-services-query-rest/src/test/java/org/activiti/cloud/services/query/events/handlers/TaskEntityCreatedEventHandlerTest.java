@@ -22,23 +22,22 @@ import javax.persistence.EntityManager;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.api.task.model.impl.TaskImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityCreatedEventHandlerTest {
 
     @InjectMocks
@@ -50,16 +49,11 @@ public class TaskEntityCreatedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void handleShouldStoreNewTaskInstance() {
         //given
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-               
+
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
                                      "task",
                                      Task.TaskStatus.CREATED);
@@ -67,14 +61,14 @@ public class TaskEntityCreatedEventHandlerTest {
         task.setProcessInstanceId(UUID.randomUUID().toString());
         task.setProcessDefinitionId("processDefinitionId");
         task.setTaskDefinitionKey("taskDefinitionKey");
- 
+
         CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(
                 task
         );
         event.setServiceName("runtime-bundle-a");
         event.setProcessDefinitionVersion(10);
         event.setBusinessKey("businessKey");
-        
+
         when(entityManager.getReference(ProcessInstanceEntity.class,
                                         task.getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
@@ -94,7 +88,7 @@ public class TaskEntityCreatedEventHandlerTest {
         assertThat(captor.getValue().getProcessDefinitionVersion()).isEqualTo(event.getProcessDefinitionVersion());
         assertThat(captor.getValue().getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(captor.getValue().getTaskDefinitionKey()).isEqualTo(task.getTaskDefinitionKey());
-        
+
     }
 
     @Test

@@ -24,36 +24,26 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEven
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAddedEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
     @InjectMocks
     private TaskCandidateGroupAddedEventHandler handler;
 
     @Mock
-    private TaskCandidateGroupRepository taskCandidateRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @Test
     public void handleShouldStoreNewTaskCandidateGroup() {
@@ -64,7 +54,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
 
         //then
         ArgumentCaptor<org.activiti.cloud.services.query.model.TaskCandidateGroup> captor = ArgumentCaptor.forClass(org.activiti.cloud.services.query.model.TaskCandidateGroup.class);
-        verify(taskCandidateRepository).save(captor.capture());
+        verify(taskCandidateGroupRepository).save(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
     }
@@ -74,7 +64,7 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //given
         CloudTaskCandidateGroupAddedEvent event = buildTaskCandidateGroupAddedEvent();
         Exception cause = new RuntimeException("Something went wrong");
-        given(taskCandidateRepository.save(any())).willThrow(cause);
+        given(taskCandidateGroupRepository.save(any())).willThrow(cause);
 
         //when
         Throwable throwable = catchThrowable(() -> handler.handle(event));
@@ -99,4 +89,5 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         //then
         assertThat(event).isEqualTo(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
     }
+
 }

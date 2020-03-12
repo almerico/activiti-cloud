@@ -15,14 +15,6 @@
  */
 package org.activiti.services.connectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -42,17 +34,24 @@ import org.activiti.runtime.api.impl.VariablesMappingProvider;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.activiti.services.test.DelegateExecutionBuilder;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class IntegrationRequestSenderTest {
 
     private static final String MY_PARENT_PROC_ID = "my-parent-proc-id";
@@ -116,10 +115,8 @@ public class IntegrationRequestSenderTest {
 
     private IntegrationRequestImpl integrationRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
@@ -155,15 +152,14 @@ public class IntegrationRequestSenderTest {
         given(processEngineConfiguration.getDeploymentManager()).willReturn(deploymentManager);
         given(deploymentManager.findDeployedProcessDefinitionById(PROC_DEF_ID)).willReturn(processDefinition);
 
-        given(processDefinition.getId()).willReturn(PROC_DEF_ID);
         given(processDefinition.getKey()).willReturn(MY_PROC_DEF_KEY);
         given(processDefinition.getVersion()).willReturn(PROC_DEF_VERSION);
     }
 
     private void configureIntegrationContext() {
-        when(integrationContextEntity.getExecutionId()).thenReturn(EXECUTION_ID);
-        when(integrationContextEntity.getId()).thenReturn(INTEGRATION_CONTEXT_ID);
-        when(integrationContextEntity.getFlowNodeId()).thenReturn(FLOW_NODE_ID);
+        lenient().when(integrationContextEntity.getExecutionId()).thenReturn(EXECUTION_ID);
+        lenient().when(integrationContextEntity.getId()).thenReturn(INTEGRATION_CONTEXT_ID);
+        lenient().when(integrationContextEntity.getFlowNodeId()).thenReturn(FLOW_NODE_ID);
     }
 
     private void configureExecution() {

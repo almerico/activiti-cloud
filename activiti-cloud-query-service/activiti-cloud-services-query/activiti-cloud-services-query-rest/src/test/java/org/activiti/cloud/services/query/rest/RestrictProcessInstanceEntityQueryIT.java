@@ -1,8 +1,7 @@
 package org.activiti.cloud.services.query.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Collections;
+import java.util.Iterator;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -12,20 +11,17 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Collections;
-import java.util.Iterator;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @TestPropertySource("classpath:test-application.properties")
 @SpringBootTest
 @EnableAutoConfiguration
@@ -40,11 +36,8 @@ public class RestrictProcessInstanceEntityQueryIT {
     @MockBean
     private SecurityManager securityManager;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
-
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");
         processInstanceEntity.setName("name");
@@ -52,8 +45,6 @@ public class RestrictProcessInstanceEntityQueryIT {
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstanceEntity);
-
-        initMocks(this);
     }
 
     @Test

@@ -16,13 +16,6 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,12 +28,20 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @InjectMocks
@@ -51,14 +52,9 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
     @Mock
     private EntityFinder entityFinder;
-    
+
     @Mock
     private TaskRepository taskRepository;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldDeleteIt() {
@@ -72,12 +68,12 @@ public class TaskEntityVariableEntityDeletedEventHandlerTest {
 
         TaskVariableEntity variableEntity = new TaskVariableEntity();
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setStatus(TaskStatus.CREATED);     
+        taskEntity.setStatus(TaskStatus.CREATED);
         Optional<TaskEntity> optional = Optional.of(taskEntity);
-        
+
         Mockito.when(taskRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
-        
+
         //when
         handler.handle(event);
 

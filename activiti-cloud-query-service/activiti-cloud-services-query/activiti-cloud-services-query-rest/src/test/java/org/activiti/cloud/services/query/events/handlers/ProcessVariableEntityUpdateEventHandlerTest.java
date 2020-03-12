@@ -18,17 +18,18 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessVariableEntityUpdateEventHandlerTest {
 
     @InjectMocks
@@ -36,11 +37,6 @@ public class ProcessVariableEntityUpdateEventHandlerTest {
 
     @Mock
     private ProcessVariableUpdater variableUpdater;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateVariable() {

@@ -16,6 +16,28 @@
 
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.entity.ModelEntity;
+import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.context.WebApplicationContext;
+
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
@@ -27,35 +49,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ModelType;
-import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.modeling.repository.ProjectRepository;
-import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
-import org.activiti.cloud.services.modeling.entity.ModelEntity;
-import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Integration tests for models rest api dealing with a non JSON models
  */
 @ActiveProfiles(profiles = { "test", "generic" })
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -81,7 +78,7 @@ public class GenericNonJsonModelTypeControllerIT {
 
     private static final String GENERIC_PROJECT_NAME = "project-with-generic-model";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
     }

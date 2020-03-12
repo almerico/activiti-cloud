@@ -3,17 +3,18 @@ package org.activiti.cloud.services.rest.assemblers;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessDefinitionResourceAssemblerTest {
 
     @InjectMocks
@@ -21,11 +22,6 @@ public class ProcessDefinitionResourceAssemblerTest {
 
     @Mock
     private ToCloudProcessDefinitionConverter converter;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {
@@ -40,4 +36,5 @@ public class ProcessDefinitionResourceAssemblerTest {
         assertThat(selfResourceLink).isNotNull();
         assertThat(selfResourceLink.getHref()).contains("my-identifier");
     }
+
 }

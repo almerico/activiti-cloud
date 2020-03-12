@@ -20,8 +20,7 @@ import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class DelegateExecutionBuilder {
 
@@ -31,10 +30,10 @@ public class DelegateExecutionBuilder {
         private DelegateExecutionBuilder() {
             execution = mock(ExecutionEntity.class);
             processInstance = mock(ExecutionEntity.class);
-            
-            when(execution.getProcessInstance()).thenReturn(processInstance);
+
+            lenient().when(execution.getProcessInstance()).thenReturn(processInstance);
         }
-        
+
         public static DelegateExecutionBuilder anExecution() {
             return new DelegateExecutionBuilder();
         }
@@ -58,28 +57,28 @@ public class DelegateExecutionBuilder {
             when(execution.getProcessInstanceBusinessKey()).thenReturn(businessKey);
             return this;
         }
-        
+
         public DelegateExecutionBuilder withFlowNodeId(String flowNodeId) {
             when(execution.getCurrentActivityId()).thenReturn(flowNodeId);
             return this;
         }
 
         public DelegateExecutionBuilder withServiceTask(ServiceTask serviceTask) {
-            when(execution.getCurrentFlowElement()).thenReturn(serviceTask);
+            lenient().when(execution.getCurrentFlowElement()).thenReturn(serviceTask);
             return this;
         }
-        
+
         public DelegateExecution build() {
             return execution;
         }
 
         public DelegateExecutionBuilder withProcessDefinitionKey(String processDefinitionKey) {
-            when(processInstance.getProcessDefinitionKey()).thenReturn(processDefinitionKey);
+            lenient().when(processInstance.getProcessDefinitionKey()).thenReturn(processDefinitionKey);
             return this;
         }
 
         public DelegateExecutionBuilder withProcessDefinitionVersion(Integer processDefinitionVersion) {
-            when(processInstance.getProcessDefinitionVersion()).thenReturn(processDefinitionVersion);
+            lenient().when(processInstance.getProcessDefinitionVersion()).thenReturn(processDefinitionVersion);
             return this;
         }
 
@@ -87,5 +86,5 @@ public class DelegateExecutionBuilder {
             when(processInstance.getParentProcessInstanceId()).thenReturn(parentProcessInstanceId);
             return this;
         }
-        
+
 }

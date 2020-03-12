@@ -17,26 +17,23 @@
 package org.activiti.cloud.services.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramController;
 import org.activiti.image.exception.ActivitiImageException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource("classpath:test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
@@ -48,15 +45,12 @@ public class ProcessDiagramGeneratorWrapperIT {
 
     @SpyBean
     private ProcessInstanceDiagramController processInstanceDiagramController;
-    
+
     @Value("classpath:/processes/SimpleProcess.bpmn20.xml")
     private Resource simpleProcess;
 
     @Value("classpath:/processes/SubProcessTest.fixSystemFailureProcess.bpmn20.xml")
     private Resource subProcessTest;
-    
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     /**
      * Test for generating a valid process diagram
@@ -142,12 +136,12 @@ public class ProcessDiagramGeneratorWrapperIT {
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
                 .thenReturn("invalid-file-name");
 
-        //THEN
-        expectedException.expect(ActivitiImageException.class);
-        expectedException.expectMessage("Error occurred while getting default diagram image from file");
-
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        ActivitiImageException e = assertThrows(ActivitiImageException.class,
+                                                () -> processDiagramGenerator.generateDiagram(bpmnModel));
+
+        //THEN
+        assertThat(e).hasMessageContaining("Error occurred while getting default diagram image from file");
     }
 
     /**
@@ -164,12 +158,12 @@ public class ProcessDiagramGeneratorWrapperIT {
                                  null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
-        //THEN
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error occurred while getting process diagram");
-
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        RuntimeException e = assertThrows(RuntimeException.class,
+                                          () -> processDiagramGenerator.generateDiagram(bpmnModel));
+
+        //THEN
+        assertThat(e).hasMessageContaining("Error occurred while getting process diagram");
     }
 
     /**

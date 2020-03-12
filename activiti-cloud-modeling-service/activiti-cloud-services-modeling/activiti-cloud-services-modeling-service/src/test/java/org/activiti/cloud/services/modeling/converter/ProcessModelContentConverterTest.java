@@ -1,3 +1,4 @@
+
 package org.activiti.cloud.services.modeling.converter;
 
 import java.util.HashMap;
@@ -9,17 +10,17 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProcessModelContentConverterTest {
 
     private ProcessModelContentConverter processModelContentConverter;
@@ -34,7 +35,7 @@ public class ProcessModelContentConverterTest {
     @Mock
     private ReferenceIdOverrider referenceIdOverrider;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         processModelContentConverter = new ProcessModelContentConverter(processModelType, bpmnXMLConverter);
     }

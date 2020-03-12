@@ -20,18 +20,18 @@ import java.util.Optional;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class EntityFinderTest {
 
     @InjectMocks
@@ -39,14 +39,6 @@ public class EntityFinderTest {
 
     @Mock
     private ProcessInstanceRepository repository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void findByIdShouldReturnResultWhenIsPresent() throws Exception {
@@ -66,17 +58,16 @@ public class EntityFinderTest {
 
     @Test
     public void findByIdShouldThrowExceptionWhenNotPresent() throws Exception {
-        //given
+        //GIVEM
         String processInstanceId = "5";
         given(repository.findById(processInstanceId)).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Error");
+        //WHEN
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                                               () -> entityFinder.findById(repository, processInstanceId, "Error"));
 
-        //when
-        entityFinder.findById(repository, processInstanceId, "Error");
-
+        //THEN
+        assertThat(e).hasMessageContaining("Error");
     }
 
     @Test
@@ -97,16 +88,16 @@ public class EntityFinderTest {
 
     @Test
     public void findOneShouldThrowExceptionWhenNotPresent() throws Exception {
-        //given
+        //GIVEN
         Predicate predicate = mock(Predicate.class);
         given(repository.findOne(predicate)).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Error");
+        //WHEN
+        IllegalStateException e = assertThrows(IllegalStateException.class,
+                                               () -> entityFinder.findOne(repository, predicate, "Error"));
 
-        //when
-        entityFinder.findOne(repository, predicate, "Error");
-
+        //THEN
+        assertThat(e).hasMessageContaining("Error");
     }
+
 }

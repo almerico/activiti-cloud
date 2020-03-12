@@ -16,10 +16,9 @@
 
 package org.activiti.cloud.services.security;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
@@ -27,21 +26,18 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
 @TestPropertySource("classpath:test-application.properties")
 @SpringBootTest
 public class ProcessDefinitionRestrictionServiceIT {
@@ -65,7 +61,7 @@ public class ProcessDefinitionRestrictionServiceIT {
     private ProcessDefinitionEntity defKey3AuthorizedService;
     private ProcessDefinitionEntity defKey1UnauthorizedService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint",
                                                           "defKey1");
@@ -87,7 +83,7 @@ public class ProcessDefinitionRestrictionServiceIT {
                                                           defKey2WildService));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processDefinitionRepository.deleteAll();
     }

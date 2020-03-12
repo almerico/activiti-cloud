@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.services.audit.jpa.streams;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -23,20 +26,15 @@ import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverte
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-import java.util.UUID;
+import static org.mockito.Mockito.*;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+@ExtendWith(MockitoExtension.class)
 public class AuditConsumerChannelHandlerImplTest {
 
     @InjectMocks
@@ -47,11 +45,6 @@ public class AuditConsumerChannelHandlerImplTest {
 
     @Mock
     private APIEventToEntityConverters converters;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void receiveEventShouldStoreEntity() {

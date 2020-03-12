@@ -26,23 +26,22 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class MQServiceTaskBehaviorTest {
 
     private static final String CONNECTOR_TYPE = "payment";
@@ -79,9 +78,8 @@ public class MQServiceTaskBehaviorTest {
     @Captor
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
                                                  eventPublisher,
                                                  integrationContextBuilder,
@@ -115,12 +113,9 @@ public class MQServiceTaskBehaviorTest {
                 .withServiceTask(serviceTask)
                 .withFlowNodeId(FLOW_NODE_ID)
                 .build();
-        given(runtimeBundleProperties.getServiceFullName()).willReturn(APP_NAME);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
-
-        given(applicationContext.containsBean(CONNECTOR_TYPE)).willReturn(false);
 
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);

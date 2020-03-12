@@ -16,17 +16,6 @@
 
 package org.activiti.services.connectors.channel;
 
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -45,15 +34,25 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.runtime.api.impl.VariablesMappingProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
+import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationResultEventHandlerTest {
 
     private static final String EXECUTION_ID = "execId";
@@ -63,7 +62,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     private static final String CLIENT_ID = "entityId";
     private static final String CLIENT_NAME = "serviceTaskName";
     private static final String CLIENT_TYPE = ServiceTask.class.getSimpleName();
- 
+
     @InjectMocks
     private ServiceTaskIntegrationResultEventHandler handler;
 
@@ -94,14 +93,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ExecutionQuery executionQuery;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-        when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
-        when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
-        when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
-        when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
-        when(executionQuery.list()).thenReturn(Collections.emptyList());
+        lenient().when(runtimeBundleProperties.getEventsProperties()).thenReturn(eventsProperties);
+        lenient().when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
+        lenient().when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
+        lenient().when(executionQuery.executionId(anyString())).thenReturn(executionQuery);
+        lenient().when(executionQuery.list()).thenReturn(Collections.emptyList());
     }
 
     @Test
@@ -139,9 +137,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
         //given
-        given(integrationContextService.findById(ENTITY_ID))
-                .willReturn(null);
-        given(executionQuery.list()).willReturn(Collections.singletonList(mock(Execution.class)));
+        given(integrationContextService.findById(ENTITY_ID)).willReturn(null);
+        lenient().when(executionQuery.list()).thenReturn(Collections.singletonList(mock(Execution.class)));
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
 
@@ -167,7 +164,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
 
-        given(runtimeBundleProperties.getServiceFullName()).willReturn("myApp");
+        lenient().when(runtimeBundleProperties.getServiceFullName()).thenReturn("myApp");
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
         IntegrationContextImpl integrationContext = buildIntegrationContext(variables);
@@ -184,12 +181,12 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(event.getEntity().getId()).isEqualTo(ENTITY_ID);
         assertThat(event.getEntity().getProcessInstanceId()).isEqualTo(PROC_INST_ID);
         assertThat(event.getEntity().getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
-        
-        
+
+
         assertThat(event.getEntity().getClientId()).isEqualTo(CLIENT_ID);
         assertThat(event.getEntity().getClientName()).isEqualTo(CLIENT_NAME);
         assertThat(event.getEntity().getClientType()).isEqualTo(CLIENT_TYPE);
-        
+
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event);
     }
 
@@ -202,19 +199,19 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientId(CLIENT_ID);
         integrationContext.setClientName(CLIENT_NAME);
         integrationContext.setClientType(CLIENT_TYPE);
-        
+
         return integrationContext;
     }
 
     @Test
     public void retrieveShouldNotSentAuditEventWhenIntegrationAuditEventsAreDisabled() {
         //given
-        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
+        lenient().when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(false);
 
         IntegrationContextEntityImpl integrationContextEntity = new IntegrationContextEntityImpl();
         String executionId = "execId";
 
-        given(integrationContextService.findById(executionId)).willReturn(integrationContextEntity);
+        lenient().when(integrationContextService.findById(executionId)).thenReturn(integrationContextEntity);
         Map<String, Object> variables = Collections.singletonMap("var1",
                 "v");
 

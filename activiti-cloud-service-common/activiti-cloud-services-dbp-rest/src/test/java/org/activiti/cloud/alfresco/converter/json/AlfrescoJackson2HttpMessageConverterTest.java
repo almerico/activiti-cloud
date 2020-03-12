@@ -21,27 +21,27 @@ import java.util.List;
 
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class AlfrescoJackson2HttpMessageConverterTest {
 
     @Spy
@@ -68,11 +68,6 @@ public class AlfrescoJackson2HttpMessageConverterTest {
 
     @Captor
     private ArgumentCaptor<EntryResponseContent<String>> contentEntryArgumentCaptor;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void writeInternalShouldConvertObjectUsingPagedResourcesConverterWhenIsAPagedResources() throws Exception {

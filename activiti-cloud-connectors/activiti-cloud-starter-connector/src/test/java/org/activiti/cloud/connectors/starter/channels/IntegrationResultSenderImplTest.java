@@ -21,19 +21,20 @@ import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationResultSenderImplTest {
 
     @InjectMocks
@@ -48,19 +49,11 @@ public class IntegrationResultSenderImplTest {
     @Mock
     private ConnectorProperties connectorProperties;
 
-
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() throws Exception {
         //given
         given(connectorProperties.getMqDestinationSeparator()).willReturn("_");
         given(resolver.resolveDestination("integrationResult" + connectorProperties.getMqDestinationSeparator() + "myApp")).willReturn(messageChannel);
-        given(connectorProperties.getServiceName()).willReturn("connectorName");
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
@@ -80,4 +73,5 @@ public class IntegrationResultSenderImplTest {
         //then
         verify(messageChannel).send(message);
     }
+
 }

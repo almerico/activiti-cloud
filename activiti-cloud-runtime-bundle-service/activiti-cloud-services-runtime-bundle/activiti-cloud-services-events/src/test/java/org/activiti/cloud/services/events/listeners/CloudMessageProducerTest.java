@@ -16,10 +16,6 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.events.BPMNMessageReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageSentEvent;
@@ -39,81 +35,81 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageSentEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNMessageWaitingEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class CloudMessageProducerTest {
 
     @InjectMocks
     private CloudMessageSentProducer cloudMessageSentProducer;
-    
+
     @InjectMocks
     private CloudMessageWaitingProducer cloudMessageWaitingProducer;
 
     @InjectMocks
     private CloudMessageReceivedProducer cloudMessageReceivedProducer;
-    
+
     @InjectMocks
     private CloudMessageSubscriptionCancelledProducer cloudMessageSubscriptionCancelledProducer;
-    
+
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
-    
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertMessageSentEventToCloudEventAndAddToAggregator() {
         //given
         BPMNMessageSentEvent eventFired = new BPMNMessageSentEventImpl(new BPMNMessageImpl());
         CloudBPMNMessageSentEvent cloudEventFired = new CloudBPMNMessageSentEventImpl();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         //when
         cloudMessageSentProducer.onEvent(eventFired);
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
     }
-    
+
     @Test
     public void shouldConvertMessageWaitingEventToCloudEventAndAddToAggregator() {
         //given
         BPMNMessageWaitingEvent eventFired = new BPMNMessageWaitingEventImpl(new BPMNMessageImpl());
         CloudBPMNMessageWaitingEvent cloudEventFired = new CloudBPMNMessageWaitingEventImpl();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         //when
         cloudMessageWaitingProducer.onEvent(eventFired);
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
     }
-    
+
     @Test
     public void shouldConvertMessageReceivedEventToCloudEventAndAddToAggregator() {
         //given
         BPMNMessageReceivedEvent eventFired = new BPMNMessageReceivedEventImpl(new BPMNMessageImpl());
         CloudBPMNMessageReceivedEvent cloudEventFired = new CloudBPMNMessageReceivedEventImpl();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         //when
         cloudMessageReceivedProducer.onEvent(eventFired);
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
-    }    
-    
+    }
+
     @Test
     public void shouldConvertMessageSubscriptionCancelledEventToCloudEventAndAddToAggregator() {
         //given
@@ -124,18 +120,18 @@ public class CloudMessageProducerTest {
                 .build();
 
         MessageSubscriptionCancelledEvent eventFired = new MessageSubscriptionCancelledEventImpl(entity);
-        
+
         CloudMessageSubscriptionCancelledEventImpl cloudEventFired = CloudMessageSubscriptionCancelledEventImpl.builder()
                                                                         .withEntity(entity)
                                                                         .build();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         //when
         cloudMessageSubscriptionCancelledProducer.onEvent(eventFired);
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
-    }    
-    
+    }
+
 }

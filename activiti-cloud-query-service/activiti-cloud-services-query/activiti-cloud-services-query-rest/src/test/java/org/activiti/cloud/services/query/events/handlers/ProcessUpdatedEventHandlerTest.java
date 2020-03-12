@@ -16,14 +16,6 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,13 +27,19 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEvent
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class ProcessUpdatedEventHandlerTest {
 
     @InjectMocks
@@ -49,14 +47,6 @@ public class ProcessUpdatedEventHandlerTest {
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateCurrentProcessInstance() {
@@ -87,18 +77,18 @@ public class ProcessUpdatedEventHandlerTest {
 
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
-        //given
+        //GIVEN
         CloudProcessUpdatedEvent event = buildProcessUpdatedEvent();
         String id = event.getEntity().getId();
-        
+
         given(processInstanceRepository.findById(id)).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find process instance with the given id: ");
+        //WHEN
+        QueryException e = assertThrows(QueryException.class,
+                                        () -> handler.handle(event));
 
-        //when
-        handler.handle(event);
+        //THEN
+        assertThat(e).hasMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test

@@ -19,19 +19,20 @@ package org.activiti.cloud.services.query.events.handlers;
 import java.util.Date;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityUpdaterTest {
 
     @InjectMocks
@@ -42,12 +43,6 @@ public class VariableEntityUpdaterTest {
 
     @Mock
     private VariableRepository variableRepository;
-
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {

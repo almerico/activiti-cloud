@@ -26,16 +26,17 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessDeployedEventHandlerTest {
 
     @InjectMocks
@@ -46,11 +47,6 @@ public class ProcessDeployedEventHandlerTest {
 
     @Mock
     private ProcessModelRepository processModelRepository;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldStoreProcessDefinitionAndProcessModel() {

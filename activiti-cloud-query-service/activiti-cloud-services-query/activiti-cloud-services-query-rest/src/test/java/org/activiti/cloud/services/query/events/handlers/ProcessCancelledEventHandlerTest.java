@@ -27,20 +27,19 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEve
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessCancelledEventHandlerTest {
 
     @InjectMocks
@@ -48,14 +47,6 @@ public class ProcessCancelledEventHandlerTest {
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     /**
      * Test that ProcessCancelledEventHandler updates the existing process instance as following:
@@ -69,8 +60,7 @@ public class ProcessCancelledEventHandlerTest {
         given(processInstanceRepository.findById("200")).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        handler.handle(createProcessCancelledEvent("200"
-        ));
+        handler.handle(createProcessCancelledEvent("200"));
 
         //then
         verify(processInstanceRepository).save(processInstanceEntity);
@@ -89,15 +79,15 @@ public class ProcessCancelledEventHandlerTest {
      */
     @Test
     public void testThrowExceptionWhenProcessInstanceNotFound() {
-        //given
+        //GIVEN
         given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find process instance with the given id: ");
+        //WHEN
+        QueryException e = assertThrows(QueryException.class,
+                                               () -> handler.handle(createProcessCancelledEvent("200")));
 
-        //when
-        handler.handle(createProcessCancelledEvent("200"));
+        //THEN
+        assertThat(e).hasMessageContaining("Unable to find process instance with the given id: ");
     }
 
     /**

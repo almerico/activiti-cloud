@@ -24,33 +24,33 @@ import static org.mockito.Mockito.when;
 
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalRolesProviderChain;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
-
+@ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalRolesProviderChainTest {
-    
+
     private KeycloakPrincipalRolesProviderChain subject;
 
     @Mock
     PrincipalRolesProvider provider1;
-    
+
     @Mock
     PrincipalRolesProvider provider2;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        
         subject = new KeycloakPrincipalRolesProviderChain(Arrays.asList(provider1, provider2));
     }
 
@@ -59,37 +59,37 @@ public class KeycloakPrincipalRolesProviderChainTest {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getRoles(Mockito.any())).thenReturn(null);
-        when(provider2.getRoles(Mockito.any())).thenReturn(Arrays.asList("role1", 
+        when(provider2.getRoles(Mockito.any())).thenReturn(Arrays.asList("role1",
                                                                          "role2"));
-       
+
         // when
         List<String> result = subject.getRoles(principal);
-        
-        // then 
+
+        // then
         assertThat(result).isNotEmpty()
                           .containsExactly("role1",
                                            "role2");
-        
+
         verify(provider1).getRoles(ArgumentMatchers.eq(principal));
         verify(provider2).getRoles(ArgumentMatchers.eq(principal));
-        
-    }    
-    
+
+    }
+
     @Test
     public void testGetRolesSecurityException() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getRoles(Mockito.any())).thenReturn(null);
         when(provider2.getRoles(Mockito.any())).thenReturn(null);
-       
+
         // when
         Throwable thrown = catchThrowable(() -> { subject.getRoles(principal); });
-        
+
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
-        
+
         verify(provider1).getRoles(ArgumentMatchers.eq(principal));
         verify(provider2).getRoles(ArgumentMatchers.eq(principal));
     }
-    
+
 }

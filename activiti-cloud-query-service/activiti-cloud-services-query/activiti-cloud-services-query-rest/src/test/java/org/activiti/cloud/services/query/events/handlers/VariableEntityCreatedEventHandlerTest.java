@@ -16,14 +16,7 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.UUID;
-
 import javax.persistence.EntityManager;
 
 import org.activiti.api.model.shared.event.VariableEvent;
@@ -36,12 +29,17 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class VariableEntityCreatedEventHandlerTest {
 
     @InjectMocks
@@ -49,17 +47,12 @@ public class VariableEntityCreatedEventHandlerTest {
 
     @Mock
     private VariableRepository variableRepository;
-    
+
     @Mock
     private TaskVariableRepository taskVariableRepository;
 
     @Mock
     private EntityManager entityManager;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldCreateAndStoreProcessInstanceVariable() {
@@ -97,12 +90,12 @@ public class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(variableInstance);
 
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
-        when(entityManager.getReference(ProcessInstanceEntity.class,
+        lenient().when(entityManager.getReference(ProcessInstanceEntity.class,
                                         event.getEntity().getProcessInstanceId()))
                 .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManager.getReference(TaskEntity.class,
+        lenient().when(entityManager.getReference(TaskEntity.class,
                                         event.getEntity().getTaskId()))
                 .thenReturn(taskEntity);
 

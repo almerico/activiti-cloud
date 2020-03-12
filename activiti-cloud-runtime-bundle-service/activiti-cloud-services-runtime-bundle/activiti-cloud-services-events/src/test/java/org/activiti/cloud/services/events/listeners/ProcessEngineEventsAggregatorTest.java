@@ -21,23 +21,22 @@ import java.util.List;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessEngineEventsAggregatorTest {
 
     @InjectMocks
@@ -56,10 +55,9 @@ public class ProcessEngineEventsAggregatorTest {
     @Mock
     private CloudRuntimeEvent<?,?> event;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-        when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
+    @BeforeEach
+    public void setUp() {
+        lenient().when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
     }
 
     @Test
@@ -93,7 +91,7 @@ public class ProcessEngineEventsAggregatorTest {
     public void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
         ArrayList<CloudRuntimeEvent<?,?>> currentEvents = new ArrayList<>();
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(currentEvents);
+        lenient().when(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).thenReturn(currentEvents);
 
         //when
         eventsAggregator.add(event);
@@ -106,7 +104,7 @@ public class ProcessEngineEventsAggregatorTest {
     @Test
     public void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(null);
+        lenient().when(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).thenReturn(null);
 
         //when
         eventsAggregator.add(event);

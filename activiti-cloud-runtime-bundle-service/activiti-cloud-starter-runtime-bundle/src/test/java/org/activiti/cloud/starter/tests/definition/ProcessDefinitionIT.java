@@ -16,7 +16,9 @@
 
 package org.activiti.cloud.starter.tests.definition;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Iterator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -30,8 +32,7 @@ import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -44,13 +45,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Iterator;
+import static org.assertj.core.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -261,7 +258,7 @@ public class ProcessDefinitionIT {
 
     private <T> T executeRequest(String url,
                                   HttpMethod method,
-                                  String contentType, 
+                                  String contentType,
                                   Class<T> javaType) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", contentType);
@@ -272,7 +269,7 @@ public class ProcessDefinitionIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         return response.getBody();
     }
-    
+
     private String executeRequest(String url,
                                   HttpMethod method,
                                   String contentType) {

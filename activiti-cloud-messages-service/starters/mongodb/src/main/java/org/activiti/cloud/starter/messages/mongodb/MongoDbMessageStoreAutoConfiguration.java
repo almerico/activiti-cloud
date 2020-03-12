@@ -27,7 +27,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-//import org.springframework.boot.data.geode.autoconfigure.ClientCacheAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -64,16 +63,16 @@ public class MongoDbMessageStoreAutoConfiguration {
     @Bean
     public MessageGroupStore messageStore(MongoTemplate mongoTemplate, MessageAggregatorProperties properties) {
         ConfigurableMongoDbMessageStore messageStore;
-        
+
         if (StringUtils.hasText(properties.getMessageStoreEntity())) {
             messageStore = new ConfigurableMongoDbMessageStore(mongoTemplate, properties.getMessageStoreEntity());
         }
         else {
             messageStore = new ConfigurableMongoDbMessageStore(mongoTemplate);
         }
-        
+
         messageStore.setLazyLoadMessageGroups(false);
-        
+
         return messageStore;
     }
 
@@ -83,19 +82,19 @@ public class MongoDbMessageStoreAutoConfiguration {
         return new MongoCustomConversions(Arrays.asList(
                 new MessageToBinaryConverter(), new BinaryToMessageConverter()));
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MongoTransactionManager transactionManager(MongoDbFactory mongoDbFactory) {
         return new MongoTransactionManager(mongoDbFactory);
-    }        
-    
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public ConcurrentMetadataStore metadataStore(MongoTemplate mongoTemplate) {
         return new MongoDbMetadataStore(mongoTemplate);
     }
-            
+
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry() {

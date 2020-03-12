@@ -21,7 +21,6 @@ import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfigur
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-//import org.springframework.boot.data.geode.autoconfigure.ClientCacheAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.hazelcast.lock.HazelcastLockRegistry;
@@ -45,26 +44,26 @@ public class HazelcastMessageStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public Config hazelcastConfig() {
         Config config = new Config();
-        
+
         config.getCPSubsystemConfig()
               .setCPMemberCount(3);
-        
+
         return config;
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public PlatformTransactionManager transactionManager(HazelcastInstance hazelcastInstance) {
         return new HazelcastTransactionManager(hazelcastInstance);
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupStore messageStore(HazelcastInstance hazelcastInstance) {
         HazelcastMessageStore messageStore = new HazelcastMessageStore(hazelcastInstance);
 
         messageStore.setLazyLoadMessageGroups(false);
-        
+
         return messageStore;
     }
 
@@ -78,5 +77,5 @@ public class HazelcastMessageStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry(HazelcastInstance hazelcastInstance) {
         return new HazelcastLockRegistry(hazelcastInstance);
-    }    
+    }
 }

@@ -22,9 +22,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -32,10 +34,10 @@ import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessage
 import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class AlfrescoWebAutoConfigurationTest {
 
     private AlfrescoWebAutoConfiguration configurer;
@@ -43,9 +45,8 @@ public class AlfrescoWebAutoConfigurationTest {
     @Mock
     private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);
     }
 
@@ -75,4 +76,5 @@ public class AlfrescoWebAutoConfigurationTest {
         //then
         assertThat(halConverter.getSupportedMediaTypes()).containsExactly(MediaTypes.HAL_JSON);
     }
+
 }

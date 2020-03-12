@@ -16,13 +16,10 @@
 
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -41,10 +38,9 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.asyncexecutor.AsyncExecutor;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,24 +52,24 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles({AuditProducerIT.AUDIT_PRODUCER_IT, TimerAuditProducerIT.TIMER_AUDIT_PRODUCER_IT})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class, 
+@ContextConfiguration(classes = {ServicesAuditITConfiguration.class,
                                 TimerAuditProducerIT.JobExecutorITProcessEngineConfigurer.class})
 public class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";
-    
+
     private static final String PROCESS_INTERMEDIATE_TIMER_EVENT = "intermediateTimerEventExample";
     private static final String FAILED_TIMER_JOB_RETRY = "failedTimerJobRetryExample";
 
@@ -82,7 +78,7 @@ public class TimerAuditProducerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
-    
+
     @Autowired
     private ProcessEngineConfiguration processEngineConfiguration;
 
@@ -90,11 +86,11 @@ public class TimerAuditProducerIT {
     AsyncExecutor asyncExecutor;
 
     private Logger logger = LoggerFactory.getLogger(TimerAuditProducerIT.class);
-    
+
     @TestConfiguration
     @Profile(TIMER_AUDIT_PRODUCER_IT)
     static class JobExecutorITProcessEngineConfigurer implements ProcessEngineConfigurationConfigurer {
-        
+
         @Override
         public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
             processEngineConfiguration.setAsyncExecutorDefaultTimerJobAcquireWaitTime(100);
@@ -103,13 +99,13 @@ public class TimerAuditProducerIT {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         streamHandler.clear();
         processEngineConfiguration.getClock().reset();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
     }
@@ -127,7 +123,7 @@ public class TimerAuditProducerIT {
                         .withName("processInstanceName")
                         .withBusinessKey("businessKey")
                         .build());
- 
+
         //when
         await().untilAsserted(() -> {
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
@@ -143,7 +139,7 @@ public class TimerAuditProducerIT {
                             tuple(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED,
                                   "timer")
                     );
-            
+
             List<CloudBPMNTimerScheduledEvent> timerEvents = receivedEvents
                     .stream()
                     .filter(CloudBPMNTimerScheduledEvent.class::isInstance)
@@ -170,18 +166,18 @@ public class TimerAuditProducerIT {
                                   startProcessEntity.getBody().getProcessDefinitionVersion(),
                                   startProcessEntity.getBody().getProcessDefinitionId(),
                                   startProcessEntity.getBody().getId(),
-                                  "timer" 
+                                  "timer"
                             )
                     );
         });
-           
+
         //when
         long waitTime = 5 * 60 * 1000;
         Date dueDate = new Date(startTime.getTime() + waitTime);
 
         // After setting the clock to time '5minutes and 5 seconds', the second timer should fire
         processEngineConfiguration.getClock().setCurrentTime(new Date(dueDate.getTime() + 5000));
-       
+
         //when
         await().untilAsserted(() -> {
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
@@ -191,7 +187,7 @@ public class TimerAuditProducerIT {
             assertThat(receivedEvents)
                     .extracting( CloudRuntimeEvent::getEventType,
                                  CloudRuntimeEvent::getEntityId)
-                    .contains( 
+                    .contains(
                             tuple(BPMNTimerEvent.TimerEvents.TIMER_FIRED,
                                   "timer"),
                             tuple(BPMNTimerEvent.TimerEvents.TIMER_EXECUTED,
@@ -199,7 +195,7 @@ public class TimerAuditProducerIT {
                             tuple(ACTIVITY_COMPLETED,
                                   "timer")
                     );
-            
+
             List<CloudBPMNTimerEvent> timerEvents = receivedEvents
                     .stream()
                     .filter(event -> (CloudBPMNTimerFiredEvent.class.isInstance(event) ||
@@ -238,9 +234,9 @@ public class TimerAuditProducerIT {
                                   startProcessEntity.getBody().getId(),
                                   "timer")
                     );
-        });        
+        });
     }
-    
+
     @Test
     public void shouldGetTimerCanceledEventByProcessDelete() {
         // GIVEN
@@ -251,7 +247,7 @@ public class TimerAuditProducerIT {
                                                                                                            .build());
         // WHEN
         processInstanceRestTemplate.delete(startProcessEntity);
-        
+
         //when
         await().untilAsserted(() -> {
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
@@ -288,24 +284,24 @@ public class TimerAuditProducerIT {
             );
         });
     }
-    
+
     @Test
     public void testTimerJobsFailRetry() throws InterruptedException {
         //given
         RetryFailingDelegate.shallThrow = true;
-        
+
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
                                                                                                            .withProcessDefinitionKey(FAILED_TIMER_JOB_RETRY)
                                                                                                            .withName("processInstanceName")
                                                                                                            .withBusinessKey("businessKey")
                                                                                                            .build());
-               
+
         //when
         await().untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-                
+
                 assertThat(receivedEvents)
                         .extracting( CloudRuntimeEvent::getEventType,
                                      CloudRuntimeEvent::getEntityId,
@@ -342,9 +338,9 @@ public class TimerAuditProducerIT {
                                       startProcessEntity.getBody().getProcessDefinitionId(),
                                       startProcessEntity.getBody().getId(),
                                       startProcessEntity.getBody().getProcessDefinitionKey(),
-                                      startProcessEntity.getBody().getProcessDefinitionVersion())  
+                                      startProcessEntity.getBody().getProcessDefinitionVersion())
                         );
-                
+
                 List<CloudBPMNTimerEvent> timerEvents = receivedEvents
                         .stream()
                         .filter(CloudBPMNTimerEvent.class::isInstance)
@@ -364,13 +360,13 @@ public class TimerAuditProducerIT {
                                       2),
                                 tuple(BPMNTimerEvent.TimerEvents.TIMER_FAILED,
                                       "timerCatchEvent",
-                                      3)  
+                                      3)
                 );
         });
-        
+
         processInstanceRestTemplate.delete(startProcessEntity);
     }
-    
+
     public static class RetryFailingDelegate implements JavaDelegate {
 
         public static final String EXCEPTION_MESSAGE = "Expected exception.";
@@ -391,5 +387,5 @@ public class TimerAuditProducerIT {
             throw new ActivitiException(EXCEPTION_MESSAGE);
           }
         }
-      }    
+      }
 }

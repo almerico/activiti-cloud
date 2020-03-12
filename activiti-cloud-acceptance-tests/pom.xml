@@ -14,7 +14,6 @@
   <name>Activiti Cloud :: Acceptance Tests</name>
   <packaging>pom</packaging>
   <modules>
-
     <module>activiti-cloud-acceptance-tests-dependencies</module>
     <module>activiti-cloud-acceptance-tests-shared</module>
     <module>activiti-cloud-acceptance-tests-core</module>
@@ -49,6 +48,12 @@
         <groupId>net.serenity-bdd</groupId>
         <artifactId>serenity-core</artifactId>
         <version>${serenity.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>io.github.openfeign.form</groupId>
@@ -61,8 +66,12 @@
         <version>${serenity-jbehave.version}</version>
         <exclusions>
           <exclusion>
-            <artifactId>groovy-all</artifactId>
             <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -70,11 +79,28 @@
         <groupId>net.serenity-bdd</groupId>
         <artifactId>serenity-spring</artifactId>
         <version>${serenity.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.xmlgraphics</groupId>
         <artifactId>batik-transcoder</artifactId>
         <version>${batik.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.xmlgraphics</groupId>
+        <artifactId>batik-awt-util</artifactId>
+        <version>${batik.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.xmlgraphics</groupId>

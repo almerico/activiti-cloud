@@ -22,17 +22,18 @@ import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessStartedEventConverterTest {
 
     @Spy
@@ -42,11 +43,6 @@ public class ProcessStartedEventConverterTest {
     @Mock
     private EventContextInfoAppender eventContextInfoAppender;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void createEventEntityShouldSetAllNonProcessContextRelatedFields() {
         //given
@@ -54,7 +50,7 @@ public class ProcessStartedEventConverterTest {
 
         //when
         ProcessStartedAuditEventEntity auditEventEntity = eventConverter.createEventEntity(event);
-     
+
         //then
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEventId()).isEqualTo(event.getId());
@@ -103,12 +99,12 @@ public class ProcessStartedEventConverterTest {
     public void createAPIEventShouldSetAllNonProcessContextRelatedFields() {
         //given
         CloudProcessStartedEventImpl cloudAuditEventEntity = buildProcessStartedEvent();
-        
+
         ProcessStartedAuditEventEntity auditEventEntity = new ProcessStartedAuditEventEntity(cloudAuditEventEntity);
-  
+
         //when
         ProcessStartedEventConverter converter = new ProcessStartedEventConverter(new EventContextInfoAppender());
-        
+
         CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl)converter.convertToAPI(auditEventEntity);
         assertThat(apiEvent)
                 .isNotNull()

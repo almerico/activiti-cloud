@@ -1,11 +1,9 @@
 package org.activiti.cloud.services.query.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import java.util.Arrays;
+import java.util.UUID;
 
 import com.querydsl.core.types.Predicate;
-import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -15,19 +13,16 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroup;
 import org.activiti.cloud.services.query.model.TaskCandidateUser;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Arrays;
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @EnableAutoConfiguration
 public class RestrictTaskEntityQueryIT {
@@ -47,12 +42,8 @@ public class RestrictTaskEntityQueryIT {
     @MockBean
     private SecurityManager securityManager;
 
-    @MockBean
-    private UserGroupManager userGroupManager;
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskRepository.deleteAll();
@@ -172,7 +163,7 @@ public class RestrictTaskEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
-        
+
         Predicate predicate = taskLookupRestrictionService.restrictTaskQuery(null);
 
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);

@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.security.Principal;
 import java.time.Duration;
 import java.util.Collections;
@@ -31,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import javax.websocket.Session;
 
 import graphql.ExecutionResult;
@@ -39,19 +30,15 @@ import graphql.ExecutionResultImpl;
 import graphql.GraphQLError;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerChannelSubscriber;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry;
-import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Publisher;
 import org.springframework.messaging.Message;
@@ -70,6 +57,10 @@ import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class GraphQLBrokerMessageHandlerTest {
 
     private final static String destination = "/ws/graphql";
@@ -97,10 +88,8 @@ public class GraphQLBrokerMessageHandlerTest {
     @Captor
     private ArgumentCaptor<Message<GraphQLMessage>> messageCaptor;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
+    @BeforeEach
+    public void setUp() {
         this.messageHandler = new GraphQLBrokerMessageHandler(this.clientInboundChannel,
                                                               this.clientOutboundChannel,
                                                               this.brokerChannel,
@@ -117,11 +106,6 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // then
         assertThat(this.messageHandler.isBrokerAvailable()).isTrue();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        //
     }
 
     @Test
@@ -206,7 +190,7 @@ public class GraphQLBrokerMessageHandlerTest {
 
         // Simulate stomp relay  subscription stream
         Flux<ExecutionResult> mockStompRelayObservable = Flux.interval(Duration.ZERO, Duration.ofMillis(20))
-                                                             .take(100)                   
+                                                             .take(100)
                                                              .map(i -> {
                                                                  Map<String, Object> data = new HashMap<>();
                                                                  data.put("key", i);
@@ -218,7 +202,7 @@ public class GraphQLBrokerMessageHandlerTest {
         StepVerifier observable = StepVerifier.create(mockStompRelayObservable)
                 .expectNextCount(100)
                 .expectComplete();
-        
+
         ExecutionResult executionResult = stubExecutionResult(mockStompRelayObservable, completeLatch);
 
         when(graphQLExecutor.execute(Mockito.anyString(), Mockito.any()))
@@ -230,7 +214,7 @@ public class GraphQLBrokerMessageHandlerTest {
         observable.verify(Duration.ofMinutes(2));
 
         assertThat(completeLatch.await(2000, TimeUnit.MILLISECONDS)).isTrue();
-        
+
         // then get last message
         verify(this.clientOutboundChannel, atLeast(99)).send(this.messageCaptor.capture());
 
@@ -269,7 +253,6 @@ public class GraphQLBrokerMessageHandlerTest {
         ExecutionResult executionResult = mock(ExecutionResult.class);
         when(graphQLExecutor.execute(Mockito.anyString(), Mockito.any())).thenReturn(executionResult);
         when(executionResult.getErrors()).thenReturn(Collections.singletonList(mock(GraphQLError.class)));
-        when(executionResult.getData()).thenReturn(null);
 
         // when
         this.messageHandler.handleMessage(message);
@@ -404,14 +387,13 @@ public class GraphQLBrokerMessageHandlerTest {
 
     private WebSocketSession mockWebSocketSession(String sessionId) {
         Session nativeSession = mock(Session.class);
-        when(nativeSession.getId()).thenReturn(sessionId);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
         StandardWebSocketSession wsSession = spy(new StandardWebSocketSession(null,
                                                                           null,
                                                                           null,
                                                                           null));
-        
+
         when(wsSession.getId()).thenReturn(sessionId);
         wsSession.initializeNativeSession(nativeSession);
 

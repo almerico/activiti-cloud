@@ -2,23 +2,19 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class IntegrationRequestImplTest {
 
     @Mock
     private IntegrationContext integrationContext;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void should_always_haveAppVersionSet(){

@@ -22,29 +22,29 @@ import java.util.UUID;
 
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.api.task.model.impl.TaskImpl;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link TaskCancelledEventHandler}
  */
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityCancelledEventHandlerTest {
 
     @InjectMocks
@@ -52,14 +52,6 @@ public class TaskEntityCancelledEventHandlerTest {
 
     @Mock
     private TaskRepository taskRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateTaskStatusToCancelled() {
@@ -87,17 +79,17 @@ public class TaskEntityCancelledEventHandlerTest {
 
     @Test
     public void handleShouldThrowExceptionWhenTaskNotFound() {
-        //given
+        //GIVEN
         CloudTaskCancelledEvent event = buildTaskCancelledEvent();
         String taskId = event.getEntity().getId();
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find task with id: " + taskId);
+        //WHEN
+        QueryException e = assertThrows(QueryException.class,
+                                        () -> handler.handle(event));
 
-        //when
-        handler.handle(event);
+        //THEN
+        assertThat(e).hasMessageContaining("Unable to find task with id: " + taskId);
     }
 
     @Test

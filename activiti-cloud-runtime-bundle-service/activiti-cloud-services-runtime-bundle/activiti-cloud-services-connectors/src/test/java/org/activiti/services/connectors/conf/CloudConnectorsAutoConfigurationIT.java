@@ -16,9 +16,6 @@
 
 package org.activiti.services.connectors.conf;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -32,8 +29,7 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -42,9 +38,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
 
@@ -56,10 +53,10 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private IntegrationContextService integrationContextService;
-    
+
     @MockBean
     private RuntimeBundleProperties runtimeBundleProperties;
-    
+
     @MockBean(name = "auditProducer")
     private  MessageChannel auditProducer;
 
@@ -74,11 +71,11 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private ManagementService managementService;
-    
+
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
-    
-    
+
+
     @Test
     public void shouldProvideMQServiceTaskBehaviorBean() {
         assertThat(behavior).isNotNull();

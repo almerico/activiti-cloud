@@ -29,19 +29,20 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessVariableEntityDeletedHandlerTest {
 
     @InjectMocks
@@ -49,17 +50,12 @@ public class ProcessVariableEntityDeletedHandlerTest {
 
     @Mock
     private VariableRepository variableRepository;
-    
+
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
     @Mock
     private EntityFinder entityFinder;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleRemoveVariableFromProcessAnDeleteIt() {
@@ -70,8 +66,8 @@ public class ProcessVariableEntityDeletedHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.CREATED);
         Optional<ProcessInstanceEntity> optional = Optional.of(processInstanceEntity);
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
-        
-        Mockito.when(processInstanceRepository.findById(anyString())).thenReturn(optional); 
+
+        Mockito.when(processInstanceRepository.findById(anyString())).thenReturn(optional);
         given(entityFinder.findOne(eq(variableRepository), any(Predicate.class), anyString())).willReturn(variableEntity);
 
         //when

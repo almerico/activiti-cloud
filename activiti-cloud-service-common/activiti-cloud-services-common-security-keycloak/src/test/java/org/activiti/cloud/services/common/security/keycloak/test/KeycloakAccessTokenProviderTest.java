@@ -16,26 +16,25 @@
 
 package org.activiti.cloud.services.common.security.keycloak.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.security.Principal;
+import java.util.Optional;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import java.security.Principal;
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenProviderTest {
-    
+
     private KeycloakAccessTokenProvider subject = new KeycloakAccessTokenProvider() { };
 
     @Mock
@@ -43,40 +42,35 @@ public class KeycloakAccessTokenProviderTest {
 
     @Mock
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
-    
+
     @Mock
     private AccessToken accessToken;
-    
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-    
+
     @Test
     public void testAccessToken() {
         // given
         when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
         when(keycloakSecurityContext.getToken()).thenReturn(accessToken);
-        
+
         // when
         Optional<AccessToken> result = subject.accessToken(principal);
-        
+
         // then
         assertThat(result).isPresent()
                           .contains(accessToken);
-        
+
     }
 
     @Test
     public void testAccessTokenEmpty() {
         // given
         Principal principal = mock(UsernamePasswordAuthenticationToken.class);
-        
+
         // when
         Optional<AccessToken> result = subject.accessToken(principal);
-        
+
         // then
         assertThat(result).isEmpty();
     }
-    
+
 }

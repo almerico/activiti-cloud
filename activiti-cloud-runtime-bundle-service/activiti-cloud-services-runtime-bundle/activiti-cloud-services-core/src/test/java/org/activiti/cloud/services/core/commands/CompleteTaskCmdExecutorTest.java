@@ -1,19 +1,20 @@
 package org.activiti.cloud.services.core.commands;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class CompleteTaskCmdExecutorTest {
 
     @InjectMocks
@@ -21,11 +22,6 @@ public class CompleteTaskCmdExecutorTest {
 
     @Mock
     private TaskAdminRuntime taskAdminRuntime;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void completeTaskCmdExecutorTest() {

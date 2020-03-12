@@ -15,21 +15,18 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSubscriptionSchemaBuilder;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSubscriptionSchemaProperties;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherDataFetcher;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+import static org.assertj.core.api.Assertions.*;
+
 @SpringBootTest(webEnvironment=WebEnvironment.NONE)
 public class GraphQLSubscriptionsAutoConfigurationTest {
 
@@ -41,7 +38,7 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
 
     @Autowired
     private EngineEventsPublisherDataFetcher stompRelayDataFetcher;
-    
+
     @EnableAutoConfiguration
     @Configuration
     static class GraphQLSubscriptionSchemaTestApplication {
@@ -58,8 +55,8 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
         assertThat(properties.getGraphqls()).isEqualTo("classpath:activiti.graphqls");
         assertThat(properties.getSubscriptionFieldName()).isEqualTo("engineEvents");
         assertThat(properties.getSubscriptionArgumentNames()).isEqualTo(new String[]{
-                                                                                "serviceName", 
-                                                                                "appName", 
+                                                                                "serviceName",
+                                                                                "appName",
                                                                                 "eventType",
                                                                                 "processDefinitionKey",
                                                                                 "processInstanceId",

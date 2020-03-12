@@ -2,18 +2,19 @@ package org.activiti.cloud.services.rest.assemblers;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessInstanceResourceAssemblerTest {
 
     @InjectMocks
@@ -21,11 +22,6 @@ public class ProcessInstanceResourceAssemblerTest {
 
     @Mock
     private ToCloudProcessInstanceConverter toCloudProcessInstanceConverter;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {

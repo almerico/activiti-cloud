@@ -15,35 +15,28 @@
 
 package org.activiti.cloud.services.core.pageable;
 
+import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
+import org.activiti.cloud.services.core.utils.MockUtils;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.impl.ProcessInstanceQueryProperty;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
-import org.activiti.cloud.services.core.utils.MockUtils;
-import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessInstanceSortApplierTest {
 
     @InjectMocks
     private ProcessInstanceSortApplier sortApplier;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
 
     @Test
     public void applySort_should_oder_by_process_instance_id_asc_by_default() throws Exception {
@@ -88,7 +81,7 @@ public class ProcessInstanceSortApplierTest {
 
     @Test
     public void applySort_should_throw_exception_when_using_invalid_property_to_sort() throws Exception {
-        //given
+        //GIVEN
         ProcessInstanceQuery query = MockUtils.selfReturningMock(ProcessInstanceQuery.class);
         Sort.Order invalidProperty = new Sort.Order(Sort.Direction.ASC,
                                                     "invalidProperty");
@@ -96,12 +89,12 @@ public class ProcessInstanceSortApplierTest {
                                                  10,
                                                  Sort.by(invalidProperty));
 
-        //then
-        expectedException.expect(ActivitiIllegalArgumentException.class);
-        expectedException.expectMessage("invalidProperty");
+        //WHEN
+        ActivitiIllegalArgumentException e = assertThrows(ActivitiIllegalArgumentException.class,
+                                                          () -> sortApplier.applySort(query, pageRequest));
 
-        //when
-        sortApplier.applySort(query,
-                              pageRequest);
+        //THEN
+        assertThat(e).hasMessageContaining("invalidProperty");
     }
+
 }

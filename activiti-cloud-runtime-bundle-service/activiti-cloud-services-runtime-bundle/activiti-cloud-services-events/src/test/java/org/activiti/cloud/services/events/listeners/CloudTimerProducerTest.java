@@ -16,26 +16,27 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.runtime.event.impl.BPMNTimerFiredEventImpl;
 import org.activiti.api.runtime.event.impl.BPMNTimerScheduledEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class CloudTimerProducerTest {
 
     @InjectMocks
     private CloudTimerFiredProducer cloudTimerFiredProducer;
-    
+
     @InjectMocks
     private CloudTimerScheduledProducer cloudTimerScheduledProducer;
 
@@ -43,11 +44,6 @@ public class CloudTimerProducerTest {
     private ToCloudProcessRuntimeEventConverter eventConverter;
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void onEventShouldConvertEventToCloudEventAndAddToAggregator() {
@@ -60,11 +56,11 @@ public class CloudTimerProducerTest {
 
         //then
         verify(eventsAggregator).add(cloudEventFired);
-        
+
         BPMNTimerScheduledEventImpl eventScheduled = new BPMNTimerScheduledEventImpl(new BPMNTimerImpl());
         CloudBPMNTimerScheduledEventImpl cloudEventScheduled = new CloudBPMNTimerScheduledEventImpl();
         given(eventConverter.from(eventScheduled)).willReturn(cloudEventScheduled);
-        
+
         //when
         cloudTimerScheduledProducer.onEvent(eventScheduled);
 

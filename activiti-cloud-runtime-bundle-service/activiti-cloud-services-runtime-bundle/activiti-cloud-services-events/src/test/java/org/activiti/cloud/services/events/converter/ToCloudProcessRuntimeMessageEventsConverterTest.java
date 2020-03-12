@@ -16,9 +16,6 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
@@ -38,12 +35,16 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
     @InjectMocks
@@ -51,11 +52,6 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertBPMNMessageSentEventToCloudBPMNMessageSentEvent() {
@@ -70,7 +66,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         //then
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
-        
+
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
 
@@ -83,7 +79,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
         //when
         CloudBPMNMessageSentEvent cloudEvent = converter.from(runtimeEvent);
-        
+
         //then
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
@@ -100,14 +96,14 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
 
         //when
         CloudBPMNMessageReceivedEvent cloudEvent = converter.from(runtimeEvent);
-        
+
         //then
         CloudBPMNMessageEventAssert.assertThat(cloudEvent)
                                    .hasEntity(entity);
 
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
+
     @Test
     public void shouldConvertMessageSubscriptionCancelledEventToCloudMessageSubscriptionCancelledEvent() {
         //given
@@ -119,13 +115,13 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
                                 .withProcessInstanceId("procInstId")
                                 .withBusinessKey("businessKey")
                                 .build();
-        
+
         MessageSubscriptionCancelledEvent runtimeEvent = new MessageSubscriptionCancelledEventImpl(entity);
-        
+
 
         //when
         CloudMessageSubscriptionCancelledEvent cloudEvent = converter.from(runtimeEvent);
-        
+
         //then
         Assertions.assertThat(cloudEvent.getEntity())
         .isNotNull()
@@ -140,26 +136,26 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
                   entity.getProcessDefinitionId(),
                   entity.getProcessInstanceId(),
                   entity.getBusinessKey());
-        
+
          verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(ArgumentMatchers.any(CloudRuntimeEventImpl.class));
     }
-    
-    
+
+
     private BPMNMessage bpmnMessageEntity(String entityId) {
         BPMNMessageImpl entity = new BPMNMessageImpl("entityId");
         entity.setProcessInstanceId("procInstId");
         entity.setProcessDefinitionId("procDefId");
-        
+
         MessageEventPayload payload = MessagePayloadBuilder.event("message")
                                                            .withBusinessKey("businessId")
                                                            .withCorrelationKey("correlationId")
                                                            .withVariable("name", "value")
                                                            .build();
-        entity.setMessagePayload(payload);     
-        
+        entity.setMessagePayload(payload);
+
         return entity;
     }
-    
+
     static class CloudBPMNMessageEventAssert extends AbstractAssert<CloudBPMNMessageEventAssert, CloudBPMNMessageEvent> {
 
         public CloudBPMNMessageEventAssert(CloudBPMNMessageEvent actual, Class<?> selfType) {
@@ -169,10 +165,10 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         public static CloudBPMNMessageEventAssert assertThat(CloudBPMNMessageEvent actual) {
             return new CloudBPMNMessageEventAssert(actual, CloudBPMNMessageEventAssert.class);
         }
-        
+
         public CloudBPMNMessageEventAssert hasEntity(BPMNMessage entity) {
           isNotNull();
-          
+
           Assertions.assertThat(actual.getEntity()).isEqualTo(entity);
           Assertions.assertThat(actual.getEntity().getProcessDefinitionId()).isEqualTo(entity.getProcessDefinitionId());
           Assertions.assertThat(actual.getEntity().getProcessInstanceId()).isEqualTo(entity.getProcessInstanceId());
@@ -180,5 +176,5 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
           return this;
         }
     }
-       
+
 }

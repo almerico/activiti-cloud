@@ -27,20 +27,18 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProcessStartedEventHandlerTest {
 
     @InjectMocks
@@ -48,14 +46,6 @@ public class ProcessStartedEventHandlerTest {
 
     @Mock
     private ProcessInstanceRepository processInstanceRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateProcessInstanceStatusToRunningAndUpdateInstanceName() {
@@ -101,17 +91,17 @@ public class ProcessStartedEventHandlerTest {
 
     @Test
     public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
-        //given
+        //GIVEN
         CloudProcessStartedEvent event = buildProcessStartedEvent();
 
-        given(processInstanceRepository.findById("200")).willReturn(Optional.empty());
+        given(processInstanceRepository.findById(anyString())).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find process instance with the given id: ");
+        //WHEN
+        QueryException e = assertThrows(QueryException.class,
+                                        () -> handler.handle(event));
 
-        //when
-        handler.handle(event);
+        //THEN
+        assertThat(e).hasMessageContaining("Unable to find process instance with the given id: ");
     }
 
     @Test

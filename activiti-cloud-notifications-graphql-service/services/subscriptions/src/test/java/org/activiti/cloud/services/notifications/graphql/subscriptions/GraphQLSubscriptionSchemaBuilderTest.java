@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.*;
 
 public class GraphQLSubscriptionSchemaBuilderTest {
 
@@ -31,9 +31,10 @@ public class GraphQLSubscriptionSchemaBuilderTest {
         assertThat(schemaBuilder.getGraphQLSchema().getSubscriptionType().getFieldDefinition("engineEvents")).isNotNull();
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testNotificationsSchemaBuilderParsesSchemaNotFoundRuntimeException() {
-        new GraphQLSubscriptionSchemaBuilder("http://notfound.com//activiti.graphqls");
+        assertThatExceptionOfType(RuntimeException.class)
+            .isThrownBy(() -> new GraphQLSubscriptionSchemaBuilder("http://notfound.com//activiti.graphqls"));
     }
 
 }

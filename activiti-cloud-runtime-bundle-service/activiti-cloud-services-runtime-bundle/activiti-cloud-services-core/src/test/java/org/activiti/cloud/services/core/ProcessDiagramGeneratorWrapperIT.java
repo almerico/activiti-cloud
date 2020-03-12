@@ -22,33 +22,29 @@ import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.image.exception.ActivitiImageException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
 @TestPropertySource("classpath:test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
-    
+
     @SpringBootApplication
     static class Application {
-        
+
     }
 
     @SpyBean
@@ -56,9 +52,6 @@ public class ProcessDiagramGeneratorWrapperIT {
 
     @Autowired
     private TestProcessEngine processEngine;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     /**
      * Test for generating a valid process diagram
@@ -123,9 +116,9 @@ public class ProcessDiagramGeneratorWrapperIT {
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("");
+            .thenReturn("");
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -151,16 +144,16 @@ public class ProcessDiagramGeneratorWrapperIT {
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
         when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
+            .thenReturn(true);
         when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("invalid-file-name");
-
-        //THEN
-        expectedException.expect(ActivitiImageException.class);
-        expectedException.expectMessage("Error occurred while getting default diagram image from file");
+            .thenReturn("invalid-file-name");
 
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        ActivitiImageException e = assertThrows(ActivitiImageException.class,
+                                                () -> processDiagramGenerator.generateDiagram(bpmnModel));
+
+        //THEN
+        assertThat(e).hasMessageContaining("Error occurred while getting default diagram image from file");
     }
 
     /**
@@ -177,12 +170,12 @@ public class ProcessDiagramGeneratorWrapperIT {
                                  null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
-        //THEN
-        expectedException.expect(ActivitiException.class);
-        expectedException.expectMessage("Error occurred while getting process diagram");
-
         //WHEN
-        processDiagramGenerator.generateDiagram(bpmnModel);
+        ActivitiException e = assertThrows(ActivitiException.class,
+                                          () -> processDiagramGenerator.generateDiagram(bpmnModel));
+
+        //THEN
+        assertThat(e).hasMessageContaining("Error occurred while getting process diagram");
     }
 
     /**
@@ -203,7 +196,7 @@ public class ProcessDiagramGeneratorWrapperIT {
         //activiti.engine.diagram.activity.font=Lucida
         //activiti.engine.diagram.label.font=InvalidFont
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{"Lucida"});
+            .thenReturn(new String[]{"Lucida"});
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -225,7 +218,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+            .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -237,4 +230,5 @@ public class ProcessDiagramGeneratorWrapperIT {
         assertThat(labelFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
         assertThat(annotationFont).isEqualTo(DEFAULT_DIAGRAM_FONT_NAME);
     }
+
 }

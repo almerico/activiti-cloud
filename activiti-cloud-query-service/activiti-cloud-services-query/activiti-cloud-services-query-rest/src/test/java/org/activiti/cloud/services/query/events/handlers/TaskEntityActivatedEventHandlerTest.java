@@ -27,20 +27,20 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class TaskEntityActivatedEventHandlerTest {
 
     @InjectMocks
@@ -48,14 +48,6 @@ public class TaskEntityActivatedEventHandlerTest {
 
     @Mock
     private TaskRepository taskRepository;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void handleShouldUpdateTaskStatusToCreatedWhenNoAssignee() {
@@ -89,7 +81,7 @@ public class TaskEntityActivatedEventHandlerTest {
                 .withId(taskId)
                 .build();
 
-        given(taskRepository.findById(taskId)).willReturn(Optional.of(taskEntity));
+        given(taskRepository.findById(eq(taskId))).willReturn(Optional.of(taskEntity));
 
         //when
         handler.handle(event);
@@ -108,20 +100,19 @@ public class TaskEntityActivatedEventHandlerTest {
 
     @Test
     public void handleShouldThrowExceptionWhenNoTaskIsFoundForTheGivenId() {
-        //given
+        //GIVEN
         CloudTaskActivatedEventImpl event = buildActivatedEvent();
 
         String taskId = event.getEntity().getId();
-        TaskEntity taskEntity = aTask().withId(taskId).build();
 
         given(taskRepository.findById(taskId)).willReturn(Optional.empty());
 
-        //then
-        expectedException.expect(QueryException.class);
-        expectedException.expectMessage("Unable to find taskEntity with id: " + taskId);
+        //WHEN
+        QueryException e = assertThrows(QueryException.class,
+                                        () -> handler.handle(event));
 
-        //when
-        handler.handle(event);
+        //THEN
+        assertThat(e).hasMessageContaining("Unable to find taskEntity with id: " + taskId);
     }
 
     @Test

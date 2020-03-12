@@ -16,48 +16,44 @@
 
 package org.activiti.cloud.services.events.listeners;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.runtime.event.impl.BPMNErrorReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class CloudErrorProducerTest {
 
     @InjectMocks
     private CloudErrorReceivedProducer cloudErrorReceivedProducer;
-    
+
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
-    
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldConvertErrorReceivedEventToCloudEventAndAddToAggregator() {
 
         BPMNErrorReceivedEvent eventFired = new BPMNErrorReceivedEventImpl(new BPMNErrorImpl());
         CloudBPMNErrorReceivedEvent cloudEventFired = new CloudBPMNErrorReceivedEventImpl();
-        
+
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
-        
+
         cloudErrorReceivedProducer.onEvent(eventFired);
 
         verify(eventsAggregator).add(cloudEventFired);
-    }    
-    
+    }
+
 }

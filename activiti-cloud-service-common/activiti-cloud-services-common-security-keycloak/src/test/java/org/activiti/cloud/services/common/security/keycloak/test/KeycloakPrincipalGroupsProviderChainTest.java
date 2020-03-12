@@ -16,41 +16,37 @@
 
 package org.activiti.cloud.services.common.security.keycloak.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
-import org.junit.Before;
-import org.junit.Test;
-import org.keycloak.KeycloakPrincipal;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakPrincipalGroupsProviderChain;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.keycloak.KeycloakPrincipal;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class KeycloakPrincipalGroupsProviderChainTest {
-    
+
     private KeycloakPrincipalGroupsProviderChain subject;
 
     @Mock
     PrincipalGroupsProvider provider1;
-    
+
     @Mock
     PrincipalGroupsProvider provider2;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        
         subject = new KeycloakPrincipalGroupsProviderChain(Arrays.asList(provider1, provider2));
     }
 
@@ -59,36 +55,36 @@ public class KeycloakPrincipalGroupsProviderChainTest {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getGroups(Mockito.any())).thenReturn(null);
-        when(provider2.getGroups(Mockito.any())).thenReturn(Arrays.asList("group1", 
+        when(provider2.getGroups(Mockito.any())).thenReturn(Arrays.asList("group1",
                                                                           "group2"));
-       
+
         // when
         List<String> result = subject.getGroups(principal);
-        
-        // then 
+
+        // then
         assertThat(result).isNotEmpty()
                           .containsExactly("group1",
                                            "group2");
-        
+
         verify(provider1).getGroups(ArgumentMatchers.eq(principal));
         verify(provider2).getGroups(ArgumentMatchers.eq(principal));
     }
-    
+
     @Test
     public void testGetGropusSecurityException() {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getGroups(Mockito.any())).thenReturn(null);
         when(provider2.getGroups(Mockito.any())).thenReturn(null);
-       
+
         // when
         Throwable thrown = catchThrowable(() -> { subject.getGroups(principal); });
-        
+
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
-        
+
         verify(provider1).getGroups(ArgumentMatchers.eq(principal));
         verify(provider2).getGroups(ArgumentMatchers.eq(principal));
-        
-    }    
+
+    }
 }

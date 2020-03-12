@@ -16,36 +16,36 @@
 
 package org.activiti.cloud.services.common.security.keycloak.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenPrincipalGroupsProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenProvider;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakAccessTokenValidator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 public class KeycloakAccessTokenPrincipalGroupsProviderTest {
-    
+
     @InjectMocks
     private KeycloakAccessTokenPrincipalGroupsProvider subject;
 
     @Mock
     private KeycloakAccessTokenProvider keycloakSecurityContextProvider;
-    
+
     @Mock
     private KeycloakAccessTokenValidator keycloakAccessTokenValidator;
 
@@ -54,12 +54,7 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
 
     @Mock
     private AccessToken accessToken;
-    
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-    
+
     @Test
     public void testGetGroups() {
         // given
@@ -68,25 +63,26 @@ public class KeycloakAccessTokenPrincipalGroupsProviderTest {
         when(accessToken.getOtherClaims()).thenReturn(Collections.singletonMap("groups",
                                                                                Arrays.asList("group1",
                                                                                              "group2")));
-        // when 
+        // when
         List<String> result = subject.getGroups(keycloakPrincipal);
-        
+
         // then
         assertThat(result).isNotEmpty()
                           .containsExactly("group1",
                                            "group2");
     }
-    
+
     @Test
     public void testGetGroupsInvalidToken() {
         // given
         when(keycloakSecurityContextProvider.accessToken(ArgumentMatchers.any())).thenReturn(Optional.of(accessToken));
         when(keycloakAccessTokenValidator.isValid(ArgumentMatchers.any())).thenReturn(false);
 
-        // when 
+        // when
         List<String> result = subject.getGroups(keycloakPrincipal);
-        
+
         // then
         assertThat(result).isNull();
     }
+
 }

@@ -16,29 +16,28 @@
 
 package org.activiti.cloud.services.common.security.keycloak.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.activiti.cloud.services.common.security.keycloak.KeycloakSecurityContextTokenProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
 import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.keycloak.representations.AccessToken;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 public class KeycloakSecurityContextTokenProviderTest {
-    
+
     private KeycloakSecurityContextTokenProvider subject = new KeycloakSecurityContextTokenProvider();
 
     @Mock
@@ -46,18 +45,7 @@ public class KeycloakSecurityContextTokenProviderTest {
 
     @Mock
     private RefreshableKeycloakSecurityContext keycloakSecurityContext;
-    
-    @Mock
-    private AccessToken accessToken;
-    
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        
-        when(principal.getKeycloakSecurityContext()).thenReturn(keycloakSecurityContext);
-        when(keycloakSecurityContext.getTokenString()).thenReturn("bearer");
-    }    
-    
+
     @Test
     public void testGetCurrentToken() {
         // given
@@ -71,24 +59,24 @@ public class KeycloakSecurityContextTokenProviderTest {
         SecurityContextHolder.getContext()
                              .setAuthentication(new KeycloakAuthenticationToken(account,
                                                                                 false));
-        
+        when(keycloakSecurityContext.getTokenString()).thenReturn("bearer");
+
         // when
         Optional<String> result = subject.getCurrentToken();
-        
+
         // then
-        assertThat(result).isPresent()
-                          .contains("bearer");
+        assertThat(result).isPresent().contains("bearer");
     }
-    
-    
+
+
     @Test
     public void testGetCurrentTokenEmpty() {
         // given
         SecurityContextHolder.clearContext();
-        
+
         // when
         Optional<String> result = subject.getCurrentToken();
-        
+
         // then
         assertThat(result).isEmpty();
     }

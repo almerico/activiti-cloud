@@ -16,28 +16,23 @@
 
 package org.activiti.cloud.starter.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.test.identity.keycloak.interceptor.KeycloakTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -48,9 +43,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-admin.properties")
 @DirtiesContext
@@ -58,7 +54,7 @@ public class QueryAdminVariablesIT {
 
     private static final String ADMIN_PROCESS_VARIABLES_URL = "/admin/v1/process-instances/{processInstanceId}/variables";
     private static final String ADMIN_TASK_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
-    
+
     private static final ParameterizedTypeReference<PagedResources<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<ProcessVariableEntity>>() {
     };
     private static final ParameterizedTypeReference<PagedResources<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedResources<TaskVariableEntity>>() {
@@ -78,7 +74,7 @@ public class QueryAdminVariablesIT {
 
     @Autowired
     private VariableRepository processVariableRepository;
-    
+
     @Autowired
     private TaskVariableRepository taskVariableRepository;
 
@@ -91,7 +87,7 @@ public class QueryAdminVariablesIT {
     private VariableEventContainedBuilder variableEventContainedBuilder;
     private TaskEventContainedBuilder taskEventContainedBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
@@ -101,7 +97,7 @@ public class QueryAdminVariablesIT {
         runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance("Process with variables");
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         processVariableRepository.deleteAll();
         taskVariableRepository.deleteAll();
@@ -232,14 +228,14 @@ public class QueryAdminVariablesIT {
                     );
         });
     }
-  
+
     @Test
     public void shouldFilterOnTaskVariableName() {
 
         //given
         Task task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                            runningProcessInstance);
-        
+
         variableEventContainedBuilder.aCreatedVariable("var1",
                                                        "v1",
                                                        "string")
@@ -276,7 +272,7 @@ public class QueryAdminVariablesIT {
                     );
         });
     }
-    
+
     //Test a case when a processInstance and a task have variable with the same name
     @Test
     public void shouldFilterOnProcessAndTaskVariableName() {
@@ -286,15 +282,15 @@ public class QueryAdminVariablesIT {
                                                        "pv1",
                                                        "string")
                 .onProcessInstance(runningProcessInstance);
-        
+
         variableEventContainedBuilder.aCreatedVariable("var2",
                                                        "pv2",
                                                        "string")
                 .onProcessInstance(runningProcessInstance);
-        
+
         Task task = taskEventContainedBuilder.aCreatedTask("Created task",
                                                            runningProcessInstance);
-        
+
         //One of task variables has same name like processInstance variable
         variableEventContainedBuilder.aCreatedVariable("var1",
                                                        "tv1",
@@ -330,7 +326,7 @@ public class QueryAdminVariablesIT {
                             tuple("var1",
                                    "tv1")
                     );
-            
+
             //when
             ResponseEntity<PagedResources<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
                                                                                                       HttpMethod.GET,
