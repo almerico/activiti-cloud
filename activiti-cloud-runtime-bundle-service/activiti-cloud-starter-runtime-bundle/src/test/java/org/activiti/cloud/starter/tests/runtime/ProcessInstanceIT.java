@@ -16,14 +16,17 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -53,8 +56,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -82,6 +83,8 @@ public class ProcessInstanceIT {
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
+    private String appVersion;
+
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
 
@@ -89,11 +92,13 @@ public class ProcessInstanceIT {
     public void setUp() {
         keycloakTestUser = "hruser";
         keycloakSecurityContextClientRequestInterceptor.setKeycloakTestUser(keycloakTestUser);
-        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
-        assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<PagedResources<CloudProcessDefinition>> processDefinitionsResponse = processDefinitionRestTemplate.getProcessDefinitions();
+        assertThat(processDefinitionsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThat(processDefinitions.getBody().getContent()).isNotNull();
-        for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
+        Collection<CloudProcessDefinition> processDefinitions = processDefinitionsResponse.getBody().getContent();
+        assertThat(processDefinitions).isNotNull();
+        appVersion = processDefinitions.iterator().next().getAppVersion();
+        for (ProcessDefinition pd : processDefinitions) {
             processDefinitionIds.put(pd.getName(),
                                      pd.getId());
         }
@@ -116,7 +121,7 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
         assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
         assertThat(returnedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
-        assertThat(returnedProcInst.getAppVersion()).isEqualTo("1");
+        assertThat(returnedProcInst.getAppVersion()).isEqualTo(appVersion);
         assertThat(returnedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
         assertThat(returnedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
         assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());

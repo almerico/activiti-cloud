@@ -16,12 +16,20 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
 import org.activiti.cloud.services.job.executor.JobMessageFailedEvent;
@@ -78,10 +86,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.*;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
@@ -208,9 +212,10 @@ public class JobExecutorIT {
                                         ActivitiEventType.JOB_EXECUTION_SUCCESS );
 
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                                                      .processDefinitionKey(ASYNC_TASK)
-                                                      .singleResult()
-                                                      .getId();
+            .processDefinitionKey(ASYNC_TASK)
+            .latestVersion()
+            .singleResult()
+            .getId();
         //when
         for(int i=0; i<jobCount; i++)
             runtimeService.createProcessInstanceBuilder()
@@ -318,9 +323,10 @@ public class JobExecutorIT {
                                         ActivitiEventType.JOB_EXECUTION_FAILURE );
 
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                                                      .processDefinitionKey(FAILED_JOB_RETRY)
-                                                      .singleResult()
-                                                      .getId();
+            .processDefinitionKey(FAILED_JOB_RETRY)
+            .latestVersion()
+            .singleResult()
+            .getId();
         //when
         runtimeService.createProcessInstanceBuilder()
                       .processDefinitionId(processDefinitionId)
@@ -360,9 +366,10 @@ public class JobExecutorIT {
                                         ActivitiEventType.JOB_EXECUTION_FAILURE );
 
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                                                      .processDefinitionKey(FAILED_TIMER_JOB_RETRY)
-                                                      .singleResult()
-                                                      .getId();
+            .processDefinitionKey(FAILED_TIMER_JOB_RETRY)
+            .latestVersion()
+            .singleResult()
+            .getId();
         //when
         runtimeService.createProcessInstanceBuilder()
                       .processDefinitionId(processDefinitionId)
@@ -410,16 +417,16 @@ public class JobExecutorIT {
 
         //when
         String processDefinitionId = repositoryService.createProcessDefinitionQuery()
-                                                      .processDefinitionKey(START_TIMER_EVENT_EXAMPLE)
-                                                      .singleResult()
-                                                      .getId();
+            .processDefinitionKey(START_TIMER_EVENT_EXAMPLE)
+            .latestVersion()
+            .singleResult()
+            .getId();
         // when
         ProcessInstance pi = runtimeService.createProcessInstanceQuery()
                                            .processDefinitionKey(START_TIMER_EVENT_EXAMPLE)
                                            .singleResult();
         // then
         assertThat(pi).isNull();
-
         await("the timer job should be created")
             .untilAsserted(() -> {
                 assertThat(managementService.createTimerJobQuery()

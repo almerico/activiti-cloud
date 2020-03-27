@@ -16,12 +16,24 @@
 
 package org.activiti.cloud.starter.tests.services.audit;
 
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SignalPayload;
@@ -33,6 +45,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,18 +55,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
-import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.ALL_REQUIRED_HEADERS;
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.RUNTIME_BUNDLE_INFO_HEADERS;
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
-
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -62,6 +63,7 @@ import static org.awaitility.Awaitility.await;
 public class SignalAuditProducerIT {
 
     private static final String SIGNAL_PROCESS = "broadcastSignalCatchEventProcess";
+    private static final String PROCESS_WITH_SIGNAL_START = "processWithSignalStart1";
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
@@ -80,7 +82,6 @@ public class SignalAuditProducerIT {
 
     @Test
     public void shouldProduceEventsWhenIntermediateSignalIsReceived() {
-
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity1 = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
                                                                                                                     .withProcessDefinitionKey(SIGNAL_PROCESS)
@@ -98,7 +99,7 @@ public class SignalAuditProducerIT {
 
         CloudProcessDefinition processWithSignalStart = processDefinitionRestTemplate.getProcessDefinitions().getBody().getContent()
                 .stream()
-                .filter(cloudProcessDefinition -> cloudProcessDefinition.getKey().equals("processWithSignalStart1"))
+                .filter(cloudProcessDefinition -> cloudProcessDefinition.getKey().equals(PROCESS_WITH_SIGNAL_START))
                 .findAny()
                 .orElse(null);
         assertThat(processWithSignalStart).isNotNull();
@@ -108,6 +109,8 @@ public class SignalAuditProducerIT {
                 .withName("Test")
                 .withVariable("signalVar", "timeToGo")
                 .build();
+
+        cleanUpInstances(PROCESS_WITH_SIGNAL_START);
 
         //when
         signalRestTemplate.signal(signalProcessInstancesCmd);
@@ -119,10 +122,12 @@ public class SignalAuditProducerIT {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
             String startedBySignalProcessInstanceId = Optional.ofNullable(runtimeService.createProcessInstanceQuery()
-                                                                                .processDefinitionKey("processWithSignalStart1")
+                                                                                .processDefinitionKey(
+                                                                                    PROCESS_WITH_SIGNAL_START)
                                                                                 .singleResult()
                                                                                 .getId())
-                                                      .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
+                                                      .orElseThrow(() -> new NoSuchElementException(
+                                                          PROCESS_WITH_SIGNAL_START));
 
             List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
                     .stream()
@@ -184,6 +189,14 @@ public class SignalAuditProducerIT {
 
     }
 
+    private void cleanUpInstances(String processDefinitionKey) {
+        List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
+            .processDefinitionKey(processDefinitionKey).list();
+        for (ProcessInstance processInstance : processInstances) {
+            runtimeService.deleteProcessInstance(processInstance.getId(), "clean up");
+        }
+    }
+
     @Test
     public void testProcessExecutionWithThrowSignal() {
         //when
@@ -201,10 +214,12 @@ public class SignalAuditProducerIT {
 
             String startedBySignalProcessInstanceId = receivedEvents.stream()
                                                           .filter(it -> PROCESS_CREATED.equals(it.getEventType())
-                                                                        && "processWithSignalStart1".equals(it.getProcessDefinitionKey()))
+                                                                        && PROCESS_WITH_SIGNAL_START
+                                                              .equals(it.getProcessDefinitionKey()))
                                                           .map(CloudRuntimeEvent::getProcessInstanceId)
                                                           .findFirst()
-                                                          .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
+                                                          .orElseThrow(() -> new NoSuchElementException(
+                                                              PROCESS_WITH_SIGNAL_START));
 
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
@@ -224,12 +239,12 @@ public class SignalAuditProducerIT {
                               tuple(ACTIVITY_STARTED, "broadcastSignalEventProcess", "businessKey", "endevent1"),
                               tuple(ACTIVITY_COMPLETED, "broadcastSignalEventProcess", "businessKey", "endevent1"),
                               tuple(PROCESS_COMPLETED, "broadcastSignalEventProcess", "businessKey", processInstanceId),
-                              tuple(PROCESS_CREATED, "processWithSignalStart1", null, startedBySignalProcessInstanceId),
-                              tuple(SIGNAL_RECEIVED, "processWithSignalStart1", null, "theStart"),
-                              tuple(PROCESS_STARTED, "processWithSignalStart1", null, startedBySignalProcessInstanceId),
-                              tuple(ACTIVITY_COMPLETED, "processWithSignalStart1", null, "theStart"),
-                              tuple(SEQUENCE_FLOW_TAKEN, "processWithSignalStart1", null, "flow1"),
-                              tuple(ACTIVITY_STARTED, "processWithSignalStart1", null, "theTask")
+                              tuple(PROCESS_CREATED, PROCESS_WITH_SIGNAL_START, null, startedBySignalProcessInstanceId),
+                              tuple(SIGNAL_RECEIVED, PROCESS_WITH_SIGNAL_START, null, "theStart"),
+                              tuple(PROCESS_STARTED, PROCESS_WITH_SIGNAL_START, null, startedBySignalProcessInstanceId),
+                              tuple(ACTIVITY_COMPLETED, PROCESS_WITH_SIGNAL_START, null, "theStart"),
+                              tuple(SEQUENCE_FLOW_TAKEN, PROCESS_WITH_SIGNAL_START, null, "flow1"),
+                              tuple(ACTIVITY_STARTED, PROCESS_WITH_SIGNAL_START, null, "theTask")
                     );
             runtimeService.deleteProcessInstance(startedBySignalProcessInstanceId, "clean up");
         });
